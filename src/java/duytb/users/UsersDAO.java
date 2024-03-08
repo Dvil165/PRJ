@@ -23,7 +23,9 @@ import javax.naming.NamingException;
 // vì sao nên sẻialize
 public class UsersDAO implements Serializable {
 
-    public boolean checkLogin(String username, String password)
+//    public boolean checkLogin(String username, String password)
+//            throws SQLException, /*ClassNotFoundException*/ NamingException {
+    public UsersDTO checkLogin(String username, String password)
             throws SQLException, /*ClassNotFoundException*/ NamingException {
         //1. get connection
         //2. create SQL String
@@ -39,7 +41,7 @@ public class UsersDAO implements Serializable {
         Connection con = null;
         PreparedStatement stm = null;
         ResultSet result = null;
-        boolean rs = false;
+        UsersDTO rs = null;
         try {
             // 1.get connection
             // có connection chưa chắc đã có kết nối
@@ -49,7 +51,7 @@ public class UsersDAO implements Serializable {
             if (con != null) { // dong nay la qry
                 //2. create SQL string
                 // mỗi mệnh dề phải trên 1 dòng, các chữ/câu lệnh cách nhau space
-                String sql = "select username "
+                String sql = "select lastName, isAdmin "
                         + "From users "
                         + "Where username = ? "
                         + "And password = ?";
@@ -68,7 +70,12 @@ public class UsersDAO implements Serializable {
 
                 // 5. process result
                 if (result.next()) { // dong if nay la mapping
-                    rs = true;
+                    //rs = true;
+                    // -> mapping
+                    // from resultset and set to properties of DTO
+                    String fullName = result.getString("lastName");
+                    boolean role = result.getBoolean("isAdmin");
+                    rs = new UsersDTO(username, null, fullName, role);
                 } // end of username and password are checked
             }
         } finally {
@@ -84,6 +91,7 @@ public class UsersDAO implements Serializable {
         }
         return rs;
 
+    //}
     }
 
     private List<UsersDTO> accounts;
@@ -190,6 +198,67 @@ public class UsersDAO implements Serializable {
             }
         } finally {
             
+            if (stm != null) {
+                stm.close();
+            }
+            if (con != null) {
+                con.close();
+            }
+        }
+        return rs;
+    }
+    
+    // so luong param cang nhieu thi cang kho de fix
+    public boolean createAccount(UsersDTO account) 
+            throws SQLException, /*ClassNotFoundException*/ NamingException {
+        //1. get connection
+        //2. create SQL String
+        //3. create Statement object
+        //4. execute query
+        //5. process result
+        // obj đặc biệt là của jdbc api 
+        //1 bắt buộc phải khai báo
+        //2 xử lí
+        //3 đóng lại at anycost
+
+        // alt shift F format code
+        Connection con = null;
+        PreparedStatement stm = null;
+        
+        boolean rs = false;
+        try {
+            // 1.get connection
+            // có connection chưa chắc đã có kết nối
+            con = DBHelper.getConnection();
+
+            // nên kiểm tra khác nuill trước khi đi tiếp
+            if (con != null) { // dong nay la qry
+                //2. create SQL string
+                // mỗi mệnh dề phải trên 1 dòng, các chữ/câu lệnh cách nhau space
+                String sql = "insert into users("
+                        + "username, password, lastName, isAdmin"
+                        + ") Values("
+                        + "?, ?, ?, ?"
+                        + ")";
+                //3. create statement obj
+                stm = con.prepareStatement(sql);
+                stm.setString(1, account.getUsername());
+                stm.setString(2, account.getPassword());
+                stm.setString(3, account.getFullname());
+                stm.setBoolean(4, account.isRole());
+                
+                //4. execute Update
+                int effectedRows = stm.executeUpdate(); // doi voi select la excuQry
+                // con lai delete, up, insert la excuteUpdate
+                // nếu dùng statement thì hàm này phải truyền ở hàm này
+                // nên đây cũng là lí do mà nó phải load lại
+                
+                // 5. process result
+                if (effectedRows > 0){
+                    rs = true;
+                }
+            }
+        } finally {
             if (stm != null) {
                 stm.close();
             }

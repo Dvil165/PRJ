@@ -28,8 +28,8 @@ public class DispatchServlet extends HttpServlet {
     private final String STARTUP_CONTROLLER = "StartUpServlet";
     private final String ADD_TO_CART_CONTROLER = "AddToCartServlet";
     private final String REMOVE_FROM_CART_CONTROLER = "RemoveFromCartServlet";
-    
     private final String VIEW_CART_PAGE = "viewCart.jsp";
+    private final String CREATE_ACCOUNT_CONTROLER = "CreateAccServlet";
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -64,8 +64,10 @@ public class DispatchServlet extends HttpServlet {
                 url = VIEW_CART_PAGE;
             } else if (button.equals("Remove selected itmes")){
                 url = REMOVE_FROM_CART_CONTROLER;
+            } else if (button.equals("Create new account")){
+                url = CREATE_ACCOUNT_CONTROLER;
             }
-        } finally { 
+        } finally {  
             RequestDispatcher rd = request.getRequestDispatcher(url);
             rd.forward(request, response);
         }

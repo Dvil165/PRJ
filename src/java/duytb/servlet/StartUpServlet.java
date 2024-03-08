@@ -6,6 +6,7 @@
 package duytb.servlet;
 
 import duytb.users.UsersDAO;
+import duytb.users.UsersDTO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
@@ -51,9 +52,10 @@ public class StartUpServlet extends HttpServlet {
                 String password = newestCk.getValue();
                 //3. check Login(call model)
                 UsersDAO dao = new UsersDAO();
-                boolean result = dao.checkLogin(username, password);
+                //boolean result = dao.checkLogin(username, password);
+                UsersDTO result = dao.checkLogin(username, password);
                 //4. process result
-                if (result){
+                if (result != null){
                     url = SEARCH_PAGE;
                 }
             } // end of not first time

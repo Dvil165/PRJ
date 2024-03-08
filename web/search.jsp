@@ -7,6 +7,7 @@
 <%@page import="duytb.users.UsersDTO"%>
 <%@page import="java.util.List"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -14,24 +15,99 @@
         <title>Search</title>
     </head>
     <body>
-        <% 
-            Cookie[] cookie = request.getCookies();
-            if (cookie != null){
-                Cookie lastCk = cookie[cookie.length - 1];
-                String username = lastCk.getName();
-            
-            %> 
-                <font color="blue">
-                welcome, <%= username %>
-                </font>
-        <%
-            }
-        %>
-        <h1> Welcome to DB servlet</h1>
+        <font color="blue">
+        welcome,${sessionScope.USER_INFO.fullname};
+        </font>
         <form action="DispatchServlet">
-            search valued <input type="text" name="txtSearchValue" value="<%= request.getParameter("txtSearchValue")%>"/> <br/>
+            search valued <input type="text" name="txtSearchValue" 
+                                 value="${param.txtSearchValue}"/> <br/>
             <input type="submit" name="btnAction" value="Search" />
         </form>
+        <br/>
+        <c:set var="searchedValue" value="${param.txtSearchValue}"/>
+        <c:if test="${not empty searchedValue}">
+            <c:set var="result" value="${requestScope.SEARCH_RESULT}"/>
+            <c:if test="${not empty result}">
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Name</th>
+                            <th>Pass</th>
+                            <th>Full Name</th>
+                            <th>Role</th>
+                            <th>delete</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="dto" items="${result}" varStatus="counter">
+                        <form action="DispatchServlet" method="POST">
+                            <tr>
+                                <td>
+                                    ${counter.count}
+                                </td>
+                                <td>
+                                    ${dto.username}
+                                    <input type="hidden" name="txtUsername" 
+                                           value="${dto.username}" />
+                                </td>
+                                <td>
+                                    ${dto.password}
+                                    <input type="hidden" name="txtPassword" 
+                                           value="${dto.password}" />
+                                </td>
+                                <td>
+                                    ${dto.fullname}
+                                </td>
+                                <td>
+                                    ${dto.role}
+                                    <input type="checkbox" name="chkAdmin" value="ON"
+                                           <c:if test="${dto.role}">
+                                               checked="checked"
+                                           </c:if>
+                                           />
+                                </td>
+                                <td>
+                                    <c:url var="deleteLink" value="DispatchServlet">
+                                        <c:param name="btnAction" value="delete"/>
+                                        <c:param name="pk" value="${dto.username}"/>
+                                        <c:param name="lastSearchValue" value="${param.txtSearchValue}"/>
+                                    </c:url>
+                                    <a href="${deleteLink}">Delete</a>
+                                </td>
+                                <td>
+                                    <input type="submit" value="Update" name="btnAction" />
+                                </td>
+                            </tr>
+                        </form>
+                    </c:forEach>
+                </tbody>
+            </table>
+
+        </c:if>
+        <c:if test="${empty result}">
+            No reco is math!
+        </c:if>
+    </c:if>
+    <%-- <% 
+        Cookie[] cookie = request.getCookies();
+        if (cookie != null){
+            Cookie lastCk = cookie[cookie.length - 1];
+            String username = lastCk.getName();
+        
+        %> 
+            <font color="blue">
+            welcome, <%= username %>
+            </font>
+    <%
+        }
+    %>
+    <h1> Welcome to DB servlet</h1>
+    <form action="DispatchServlet">
+        search valued <input type="text" name="txtSearchValue" value="<%= request.getParameter("txtSearchValue")%>"/> <br/>
+        <input type="submit" name="btnAction" value="Search" />
+    </form>
 
         <br/>
         <%
@@ -127,5 +203,6 @@
                 }
             }//end search
 %>
-    </body>
+    --%>    
+</body>
 </html>
